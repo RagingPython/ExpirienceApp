@@ -1,6 +1,7 @@
 package shitycoders.expirienceapp;
 
 
+import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -12,11 +13,16 @@ import android.widget.TextView;
 public class EmptyactivitylayoutActivity extends AppCompatActivity implements View.OnClickListener {
     EditText in1;
     EditText in2;
+    EditText newNote;
+    EditText notes;
     TextView out;
     Button btnPlus;
     Button btnMinus;
     Button btnMult;
     Button btnDiv;
+    Button btnAddNewNote;
+
+    DbConnector db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,16 +30,21 @@ public class EmptyactivitylayoutActivity extends AppCompatActivity implements Vi
         setContentView(R.layout.emptyactivitylayout);
         in1 = (EditText) findViewById(R.id.value1);
         in2 = (EditText) findViewById(R.id.value2);
+        newNote = (EditText) findViewById(R.id.addNote);
+        notes = (EditText) findViewById(R.id.notes);
         out = (TextView) findViewById(R.id.textOut);
         btnPlus = (Button) findViewById(R.id.button_plus);
         btnMinus = (Button) findViewById(R.id.button_minus);
         btnMult = (Button) findViewById(R.id.button_mult);
         btnDiv = (Button) findViewById(R.id.button_div);
+        btnAddNewNote = (Button) findViewById(R.id.buttonAdd);
         btnPlus.setOnClickListener(this);
         btnMinus.setOnClickListener(this);
         btnMult.setOnClickListener(this);
         btnDiv.setOnClickListener(this);
-
+        btnAddNewNote.setOnClickListener(this);
+        db=new DbConnector(getApplicationContext());
+        refreshNotes();
     }
 
 
@@ -62,6 +73,23 @@ public class EmptyactivitylayoutActivity extends AppCompatActivity implements Vi
                     out.setText(a1 / a2 + "");
                 } else {out.setText("Division by zero!");}
                 break;
+            case (R.id.buttonAdd):
+                db.addRecord(newNote.getText().toString());
+                refreshNotes();
+                break;
+        }
+    }
+
+    public void refreshNotes() {
+        Cursor cur = db.readAll();
+        notes.setText("");
+        if (cur != null) {
+            if (cur.getCount()>0) {
+                cur.moveToFirst();
+                do {
+                    notes.append(cur.getString(0)+"\n");
+                } while (cur.moveToNext());
+            }
         }
     }
 }
